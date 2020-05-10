@@ -106,10 +106,14 @@ current buffer's, reload dir-locals."
   (setq db 1)
         (vd 'buffer-file-name )
         (cond
+         (region-beginning)
   ((string-equal buffer-file-name "/Users/rst/.config/karabiner.edn")
   (progn (and (vdp) (say "Saving file"))  (or (make_goku) (say "goku done, but use kar py file instead"))))
   ((string-equal buffer-file-name "/Users/rst/.config/karabiner_prettified_before_python_inject.edn")
    (write_goku_with_py))
+  ((string= buffer-file-name "/Users/rst/wrk/dotfiles/.xonshrc")(copy-file buffer-file-name "/ssh:srv:/home/domain/rustam/.xonshrc"))
+  ((string= buffer-file-name "/Users/rst/wrk/dotfiles/.xonshrc")(copy-file buffer-file-name "/ssh:srv:/home/domain/rustam/.xonshrc"))
+
   ))
     (add-hook 'after-save-hook 'my-after-save-actions)
   (defun backward-kill-line (arg)
