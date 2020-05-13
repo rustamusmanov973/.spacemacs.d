@@ -13,6 +13,7 @@
                                        ("bs" "Star/Scratch..")
                                        ("bsm" "Messages..")
                                        ("bsw" "Warnings..")
+                                       ("bg" "misc..")
                                        ))
 ;; (print server-name)
 ;; (server-start)
@@ -45,6 +46,8 @@
 "wx" 'ill-buffer-and-window
 "k[" 'beginning-of-defun
 "k]" (lambda () (interactive) (progn (beginning-of-defun)(evil-jump-item)))
+"bgr" 'rename-buffer
+"fem" (lambda () (interactive) (find-file "~/.spacemacs.d/module.el"))
 )
 
 (spacemacs/declare-prefix-for-mode 'emacs-lisp-mode "m" "Mark ...")

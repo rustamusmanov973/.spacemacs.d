@@ -4,7 +4,7 @@
     (let ((enable-local-variables :all))
       (hack-dir-local-variables-non-file-buffer)))
   (defun my-reload-dir-locals-for-all-buffer-in-this-directory ()
-    "For every buffer with the same `default-directory` as the 
+    "For every buffer with the same `default-directory` as the
 current buffer's, reload dir-locals."
     (interactive)
     (let ((dir default-directory))
@@ -105,16 +105,34 @@ current buffer's, reload dir-locals."
         (print "After save activated")
   (setq db 1)
         (vd 'buffer-file-name )
-        (cond
-         (region-beginning)
-  ((string-equal buffer-file-name "/Users/rst/.config/karabiner.edn")
-  (progn (and (vdp) (say "Saving file"))  (or (make_goku) (say "goku done, but use kar py file instead"))))
-  ((string-equal buffer-file-name "/Users/rst/.config/karabiner_prettified_before_python_inject.edn")
-   (write_goku_with_py))
-  ((string= buffer-file-name "/Users/rst/wrk/dotfiles/.xonshrc")(copy-file buffer-file-name "/ssh:srv:/home/domain/rustam/.xonshrc"))
-  ((string= buffer-file-name "/Users/rst/wrk/dotfiles/.xonshrc")(copy-file buffer-file-name "/ssh:srv:/home/domain/rustam/.xonshrc"))
-
-  ))
+        (let* ((bfn buffer-file-name))
+          (cond
+           ((string-equal bfn "/Users/rst/.config/karabiner.edn")
+            (progn (and (vdp) (say "Saving file"))  (or (make_goku) (say "goku done, but use kar py file instead"))))
+           ((string-equal bfn "/Users/rst/.config/karabiner_prettified_before_python_inject.edn")
+            (write_goku_with_py))
+           ((string-equal bfn "/Users/rst/wrk/dotfiles/.zprofile")
+            (progn
+              (copy-file  "/Users/rst/wrk/dotfiles/.zprofile" "~/.zprofile" t)
+              (copy-file  "/Users/rst/wrk/dotfiles/.zprofile" "/ssh:srv:/home/domain/rustam/.profile" t)
+              ))
+           ((string-equal bfn "/Users/rst/wrk/dotfiles/.zshrc")
+            (progn
+              (copy-file  "/Users/rst/wrk/dotfiles/.zshrc" "~/.zshrc" t)
+              (copy-file  "/Users/rst/wrk/dotfiles/.zshrc" "/ssh:srv:/home/domain/rustam/.zshrc" t)
+              ))
+           ((string-equal bfn "/Users/rst/wrk/dotfiles/.bash_aliases")
+            (progn
+              (copy-file  "/Users/rst/wrk/dotfiles/.bash_aliases" "~/.bash_aliases" t)
+              (copy-file  "/Users/rst/wrk/dotfiles/.bash_aliases" "/ssh:srv:/home/domain/rustam/.bash_aliases" t)
+              ))
+           ((string-equal bfn "/Users/rst/wrk/dotfiles/.xonshrc")
+            (progn
+              (copy-file  "/Users/rst/wrk/dotfiles/.xonshrc" "~/.xonshrc" t)
+              (copy-file  "/Users/rst/wrk/dotfiles/.xonshrc" "/ssh:srv:/home/domain/rustam/.xonshrc" t)
+              ))
+           ;; ssh, .spacemacs.d , .emacs.d, 
+           )))
     (add-hook 'after-save-hook 'my-after-save-actions)
   (defun backward-kill-line (arg)
     "Kill ARG lines backward."
@@ -207,7 +225,7 @@ non-empty directories is allowed."
 
   (defun execute-file-auto ()
     (interactive)
-    (setq args (read-string "With arg: "))
+(setq args (read-string "With arg: "))
     (save-buffer)
     (print buffer-file-name)
     (setq qbfn (concat "'" buffer-file-name "'"))
@@ -467,11 +485,11 @@ only if external addressbook-bookmark package is installed."
 (defun quick-view-file-at-point ()
   "Preview the file at point then jump back after some idle time.
 
-In order for this to work you need to bind this function to a key combo, 
+In order for this to work you need to bind this function to a key combo,
 you cannot call it from the minibuffer and let it work.
 
 The reason it works is that by holding the key combo down, you inhibit
-idle timers from running so as long as you hold the key combo, the 
+idle timers from running so as long as you hold the key combo, the
 buffer preview will still display."
   (interactive)
   (let* ((buffer (current-buffer))
@@ -496,7 +514,7 @@ buffer preview will still display."
           (save-excursion (insert contents))
           (local-set-key (kbd "C-M-v") (lambda () (interactive) (sit-for .2)))
           (run-with-idle-timer
-           .7 
+           .7
            nil
            (lambda ()
              (switch-to-buffer buffer)
@@ -548,33 +566,50 @@ buffer preview will still display."
 
   (global-visual-line-mode t)
 (setq dotspacemacs-distinguish-gui-tab t)
+(defalias 'nuke 'delete-trailing-whitespace)
 (setq org-ref-bibliography-notes "~/org/ref/notes.org"
       org-ref-default-bibliography '("~/org/ref/master.bib")
-      org-ref-pdf-directory "~/org/ref/pdfs/"
-)
+      org-ref-pdf-directory "~/org/ref/pdfs/")
 
+(defalias 'nuke 'delete-trailing-whitespace)
 
-;; SETQs
-(ranger-override-dired-mode t)
-(setq my_path (getenv "PATH"))
 ;; MISC CODE:
+
+;; (ssh-deploy-async . 1)
+;; (ssh-deploy-on-explicit-save . 0)
+;; (ssh-deploy-hydra "C-c C-z")
+;; (global-set-key (kbd "C-c C-z") 'ssh-deploy-prefix-map)
 
 ;; ssh-deploy - prefix = C-c C-z, f = forced upload, u = upload, d = download, x = diff, t = terminal, b = browse, h = shell
 ;; (ssh-deploy-line-mode) ;; If you want mode-line feature
 ;; (ssh-deploy-add-menu) ;; If you want menu-bar feature
 ;; (ssh-deploy-add-after-save-hook) ;; If you want automatic upload support
 ;; (ssh-deploy-add-find-file-hook) ;; If you want detecting remote changes support
-;; (ssh-deploy-async . 1)
-;; (ssh-deploy-on-explicit-save . 0)
-;; (ssh-deploy-hydra "C-c C-z")
-;; (global-set-key (kbd "C-c C-z") 'ssh-deploy-prefix-map)
-
-(when (string= system-type "darwin")
-  (setq dired-use-ls-dired nil))
-(progn (print "my_path:")(print my_path))
-
-(load "~/.hammerspoon/spacehammer.el")
 
 
 (defun yasnippet-snippets--fixed-indent ()
   (print "I am ugly function yasnippet...indent"))
+(print auto-revert-remote-files)
+(setq auto-revert-remote-files t)
+
+(start-process-shell-command "jup" "jup" "jupyter notebook --no-browser --port 22033")
+
+
+
+;; SETQs
+(ranger-override-dired-mode t)
+;; (revert-without-query '("/ssh:srv:/home/domain/rustam/.xonshrc"))
+;; (revert-without-query '("~/.xonshrc"))
+(setq projectile-mode-line "Projectile")
+(setq remote-file-name-inhibit-cache nil)
+(setq vc-ignore-dir-regexp
+      (format "%s\\|%s"
+              vc-ignore-dir-regexp
+              tramp-file-name-regexp))
+(setq tramp-verbose 1)
+(setq my_path (getenv "PATH"))
+
+(when (string= system-type "darwin")
+  (setq dired-use-ls-dired nil))
+(progn (print "my_path:")(print my_path))
+;; (load "~/.hammerspoon/spacehammer.el")
