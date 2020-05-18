@@ -236,6 +236,7 @@ non-empty directories is allowed."
 
   (defun ace-split (buf-name ori)
     (interactive)
+    (require 'ace-window)
     (with-selected-window (aw-select (concat "Select window for " buf-name " buffer"))(my-eval-string (concat "(split-window-" ori "-and-focus)"))(progn (switch-to-buffer buf-name)(end-of-buffer)))
     )
   (defun ace-messages-right () (interactive)(ace-split "*Messages*" "right"))
@@ -592,7 +593,7 @@ buffer preview will still display."
 (print auto-revert-remote-files)
 (setq auto-revert-remote-files t)
 
-(start-process-shell-command "jup" "jup" "jupyter notebook --no-browser --port 22033")
+;; (start-process-shell-command "jup" "jup" "jupyter notebook --no-browser --port 22033")
 
 
 
@@ -613,3 +614,97 @@ buffer preview will still display."
   (setq dired-use-ls-dired nil))
 (progn (print "my_path:")(print my_path))
 ;; (load "~/.hammerspoon/spacehammer.el")
+(defun eww-new (url)
+  (interactive
+   (let* ((prompt (concat "Enter url: ")))
+     (list (read-string prompt nil nil))))
+    (switch-to-buffer (generate-new-buffer "eww"))
+    (eww-mode)
+    (eww url))
+
+
+(defun helm-find-files-with-inp (input)
+  (interactive "P")
+  (let* ((hist            "")
+         (smart-input     "")
+         (default-input   "")
+         (input-as-presel "")
+         (presel          ""))
+    ;; Continue using the same display function as history which used
+    ;; probably itself the same display function as inner HFF call,
+    ;; i.e. if history was using frame use a frame otherwise use a window.
+    
+    (set-text-properties 0 (length input) nil input)
+    (setq current-prefix-arg nil)
+    ;; Allow next helm session to reuse helm--last-frame-parameters as
+    ;; resume would do.
+    (let ((helm--executing-helm-action (not (null hist))))
+      (helm-find-files-1 input (and presel (null helm-ff-no-preselect)
+                                    (concat "^" (regexp-quote presel)))))))
+
+
+
+(defun ranger-go (path)
+  "Go subroutine"
+  (interactive
+   (list
+    (read-char-choice
+     "e   : /etc
+U   : /Users
+d   : /dev
+l   : follow directory link
+L   : follow selected file
+o   : /opt
+v   : /var
+h   : ~/
+m   : /media
+M   : /mnt
+s   : /srv
+r,/ : /
+R   : ranger . el location
+> "
+     '(?q ?e ?u ?d ?l ?L ?o ?v ?m ?M ?s ?r ?R ?/ ?h ?g ?D ?j ?k ?T ?t ?n ?c))))
+  (message nil)
+  (let* ((c (char-to-string path))
+         (new-path
+          (cl-case (intern c)
+            ('/ "/")
+            ('u "/Users")
+            ('o "/opt")
+            ('v "/var")
+            ('h  "~/")
+            ('m "/Users/rst/msc/")
+            ('n "/Users/rst/msc/daemons/")
+            ('l "/Users/rst/lib/")
+            ('a "/Users/rst/lib/as")
+            ('p "/Users/rst/lib/py/")
+            ('s "/Users/rst/lib/sh/")
+            ('e "/Users/rst/lib/el/")
+            ('r "/Users/rst/lib/rc/")
+            ('w "/Users/rst/wrk/")
+            ('f "/Users/rst/wrk/dotfiles")
+            ('L "/Users/rst/wrk/lib/")
+            ('d "/Users/rst/Downloads/")
+            ('D "/Users/rst/Desktop/")
+            ))
+         (alt-option
+          (cl-case (intern c)
+            ;; Subdir Handlng
+            ('j 'ranger-next-subdir)
+            ('k 'ranger-prev-subdir)
+            ;; Tab Handling
+            ('n 'ranger-new-tab)
+            ('T 'ranger-prev-tab)
+            ('t 'ranger-next-tab)
+            ('c 'ranger-close-tab)
+            ('g 'ranger-goto-top))))
+    (when (string-equal c "q")
+      (keyboard-quit))
+    (when (and new-path (file-directory-p new-path))
+      (ranger-find-file new-path))
+    (when (eq system-type 'windows-nt)
+      (when (string-equal c "D")
+        (ranger-show-drives)))
+    (when alt-option
+      (call-interactively alt-option))))
+
