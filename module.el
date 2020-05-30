@@ -39,43 +39,6 @@ current buffer's, reload dir-locals."
     "Say str asynchronously"
     (async-shell-command (concat "say '"  str "'"))
     )
-  (defun vdp ()
-    (and (boundp 'db) (member db '(t 1)))
-    )
-
-  (cl-defun vd (sym &optional (comment "") (idb nil))
-    (when (or idb (vdp))
-      (or (string= "" comment)
-          (progn
-            (setq comment2 (concat "[" comment "]"))
-            (setq comment comment2)))
-
-      (setq arg_type (type-of sym))
-      (cond
-       ((typep sym 'symbol)
-        (progn
-          (setq var_name (symbol-name sym))
-          (setq var_value (symbol-value sym))
-          )
-        )
-       (t (progn (print "VD: UNKNOWN variable TYPE. your var:") (print sym))))
-       (message (concat "VD["
-                      var_name
-                      "]"
-                      comment
-                      ">>:"))
-       (message var_value)
-
-       ))
-    (setq db 1)
-
-    (defun shell-command-to-trimmed-string (str)
-    (setq db 1)
-    (vd 'str)
-    (setq otp (shell-command-to-string  str))
-    (vd 'otp "b tr")
-    (setq trimmed_output (string-trim otp))
-    )
     (defun write_goku_with_py ()
       (interactive )
     (print  "write_goku_with_py started")
@@ -94,57 +57,59 @@ current buffer's, reload dir-locals."
   (defun make_goku ()
   (setq goku_output (shell-command-to-trimmed-string  "goku &; sleep 2; kill -9 $!"))
   (if (string-match "Done!" goku_output )
-  (print "make_goku: OK")
+  (message "make_goku: OK")
   (progn
-  (print (concat "make_goku ERROR: goku_output not 'Done!'>>|" goku_output "|"))
+  (message (concat "make_goku ERROR: goku_output not 'Done!'>>|" goku_output "|"))
   (asay "goku error")
   )))
 
+
 (defun my-after-save-actions ()
         "Used in `after-save-hook'."
-        (print "After save activated")
-  (setq db 1)
-        (vd 'buffer-file-name )
+        (message "After save activated")
         (let* ((bfn buffer-file-name))
           (cond
-           ((string-equal bfn "/Users/rst/.config/karabiner.edn")
-            (progn (and (vdp) (say "Saving file"))  (or (make_goku) (say "goku done, but use kar py file instead"))))
-           ((string-equal bfn "/Users/rst/.config/karabiner_prettified_before_python_inject.edn")
+           ((member bfn (mapcar #'mac-concat-wdtf '(".profile" ".zprofile" ".zshrc" ".aliases" ".xonshrc")))
+            (mac-copy-file-to-hdir bfn)
+            (srv-copy-file-to-hdir bfn)
+            (lom2-copy-file-to-rhdir bfn))
+           ((string-equal bfn (mac-concat-dcnf "karabiner.edn"))
+            (and (vdp) (say "Saving file"))(or (make_goku) (say "goku done, but use kar py file instead")))
+           ((string-equal bfn (mac-concat-dcnf "karabiner_prettified_before_python_inject.edn"))
             (write_goku_with_py))
-           ((string-equal bfn "/Users/rst/wrk/dotfiles/.zprofile")
-            (progn
-              (copy-file  "/Users/rst/wrk/dotfiles/.zprofile" "~/.zprofile" t)
-              (copy-file  "/Users/rst/wrk/dotfiles/.zprofile" "/ssh:srv:/home/domain/rustam/.profile" t)
-              ))
-           ((string-equal bfn "/Users/rst/wrk/dotfiles/.zshrc")
-            (progn
-              (copy-file  "/Users/rst/wrk/dotfiles/.zshrc" "~/.zshrc" t)
-              (copy-file  "/Users/rst/wrk/dotfiles/.zshrc" "/ssh:srv:/home/domain/rustam/.zshrc" t)
-              ))
-           ((string-equal bfn "/Users/rst/wrk/dotfiles/.bash_aliases")
-            (progn
-              (copy-file  "/Users/rst/wrk/dotfiles/.bash_aliases" "~/.bash_aliases" t)
-              (copy-file  "/Users/rst/wrk/dotfiles/.bash_aliases" "/ssh:srv:/home/domain/rustam/.bash_aliases" t)
-              ))
-           ((string-equal bfn "/Users/rst/wrk/dotfiles/.xonshrc")
-            (progn
-              (copy-file  "/Users/rst/wrk/dotfiles/.xonshrc" "~/.xonshrc" t)
-              (copy-file  "/Users/rst/wrk/dotfiles/.xonshrc" "/ssh:srv:/home/domain/rustam/.xonshrc" t)
-              ))
-           ;; ssh, .spacemacs.d , .emacs.d, 
-           )))
+           ((string-equal (file-name-directory bfn) mac-wlib)
+            (mac-copy-file-to-lb37 bfn)
+            (srv-copy-file-to-lb37 bfn)
+            ;; (lom2-copy-file-to-lb37 bfn)
+            )
+           ((string-equal bfn (mac-concat-wdtf "00-first.py"))
+            (mac-copy-file-to-ipython-startup bfn)
+            (srv-copy-file-to-ipython-startup bfn)
+            ;; (lom2-copy-file-to-ext37 bfn)
+            )
+           ((string-equal bfn (mac-concat-wdtf "lb_prms.py"))
+           (mac-copy-file-to-ext37 bfn)
+           (srv-copy-file-to-ext37 bfn)
+           ;; (lom2-copy-file-to-ext37 bfn)
+           )
+           ((string-equal (file-name-directory bfn) mac-ubin)
+            (debug)
+            (srv-copy-file-to-ubin bfn)
+            (lom2-copy-file-to-ubin bfn)
+           ;; .ssh, .spacemacs.d , .emacs.dk,  executables in 
+           ))))
     (add-hook 'after-save-hook 'my-after-save-actions)
   (defun backward-kill-line (arg)
     "Kill ARG lines backward."
     (interactive "p")
     (kill-line (- 1 arg)))
   (defun h_world ()
-    (print "hello world!!")
+    (message "hello world!!")
     (message "hello world!!")
     )
   (defun hwd ()
     (interactive)
-    (print "hello world!!")
+    (message "hello world!!")
     (message "hello world!!")
     )
   (defun resolve-rel-path-auto ()
@@ -158,7 +123,7 @@ current buffer's, reload dir-locals."
             (setq nfn (s-replace "/Users/rst/lib/ss/" "s" nfn))
             (vd 'nfn)
             ;; (message (kill-new nfn))
-            (print nfn)
+            (message nfn)
             )
         (error "Buffer not visiting a file")))
     )
@@ -191,7 +156,6 @@ current buffer's, reload dir-locals."
             )
         (error "Buffer not visiting a file")))
     )
-
   (defun dired-do-snippet-action1 (&optional arg)
     "Delete all marked (or next ARG) files.
 `dired-recursive-deletes' controls whether deletion of
@@ -210,24 +174,21 @@ non-empty directories is allowed."
     ;; (find-file "/Users/rst/.emacs.d/private/snippets/lisp-mode/comment")
     ;; (execute-kbd-macro [?i ?f ?o ?o ?b ?a ?r escape])
 
-    (let ((lst (dired-map-over-marks (print (dired-get-filename))
+    (let ((lst (dired-map-over-marks (message (dired-get-filename))
                                      nil)))
       (progn (loop for x in lst
-             do (print x)))
+             do (message x)))
       (switch-to-buffer "Music")
 
 
       )
      arg t)
 
-  (defun my-eval-string (string)
-    (eval (car (read-from-string (format "(progn %s)" string)))))
-
   (defun execute-file-auto ()
     (interactive)
 (setq args (read-string "With arg: "))
     (save-buffer)
-    (print buffer-file-name)
+    (message buffer-file-name)
     (setq qbfn (concat "'" buffer-file-name "'"))
     (setq scm (concat "chmod 777 " qbfn "; " qbfn " " args))
     (vd 'scm)
@@ -254,12 +215,12 @@ non-empty directories is allowed."
   (setq gepy-alist '(
                      ("jup" .      (1 "jupyter-notebook --no-browser --port 8888"))
                      ("klg" .      (2 "keylogger"))
-                     ("jpf_gpu" .  (3 "while true; do ssh -N -L 51515:localhost:51515 gpu2 || echo 'retrying...'; done"))
-                     ("jpf_l2" .   (4 "hile true; do ssh -N -L 51517:localhost:51517 lom2 || echo 'retrying...'; done"))
+                     ("jpf_gpu" .  (3 "while true; do ssh -N -L 51515:localhost:51515 gpu || echo 'retrying...'; done"))
+                     ("jpf_l2" .   (4 "hile true; do ssh -N -L 51517:localhost:51517 lom || echo 'retrying...'; done"))
                      ("pypf_srv" . (5 "while true; do ssh -N -R 9170:localhost:9170 gpu || echo 'retrying...'; done"))
                      ("als_ppf" .  (6 "hile true; do ssh -vvv -p 22022 -N -R9000:localhost:9000 rustam@alesia.store || echo 'retrying...'; done")))
                      )
-  (defun gepy ()
+  (defun gepy_very_bad ()
     (setq proc23 (start-process "jup" "jup" "jupyter-notebook" "--no-browser" "--port" "5555"))
     (process-live-p proc23)
 
@@ -268,7 +229,6 @@ non-empty directories is allowed."
     (start-process-shell-command "jpf_gpu" "ge:jpf_gpu" "while true; do ssh -N -L 51515:localhost:51515 gpu2 || echo 'retrying...'; done")
     (start-process-shell-command "jpf_l2" "ge:jpf_l2" "hile true; do ssh -N -L 51517:localhost:51517 lom2 || echo 'retrying...'; done")
     (start-process-shell-command "pypf_srv" "ge:pypf_srv" "while true; do ssh -N -R 9170:localhost:9170 gpu || echo 'retrying...'; done")
-    (start-process-shell-command "pykkpf_srv" "ge:pypfk_srv" "while true; do ssh -N -R 9170:localhost:9170 gpu || echo 'retrying...'; done")
     (start-process-shell-command "als_ppf" "ge:als_ppf" "hile true; do ssh -vvv -p 22022 -N -R9000:localhost:9000 rustam@alesia.store || echo 'retrying...'; done")
     )
 
@@ -589,8 +549,8 @@ buffer preview will still display."
 
 
 (defun yasnippet-snippets--fixed-indent ()
-  (print "I am ugly function yasnippet...indent"))
-(print auto-revert-remote-files)
+  (message "I am ugly function yasnippet...indent"))
+;; (print auto-revert-remote-files)
 (setq auto-revert-remote-files t)
 
 ;; (start-process-shell-command "jup" "jup" "jupyter notebook --no-browser --port 22033")
@@ -612,7 +572,7 @@ buffer preview will still display."
 
 (when (string= system-type "darwin")
   (setq dired-use-ls-dired nil))
-(progn (print "my_path:")(print my_path))
+(progn (message "my_path:")(message my_path))
 ;; (load "~/.hammerspoon/spacehammer.el")
 (defun eww-new (url)
   (interactive
@@ -633,7 +593,7 @@ buffer preview will still display."
     ;; Continue using the same display function as history which used
     ;; probably itself the same display function as inner HFF call,
     ;; i.e. if history was using frame use a frame otherwise use a window.
-    
+
     (set-text-properties 0 (length input) nil input)
     (setq current-prefix-arg nil)
     ;; Allow next helm session to reuse helm--last-frame-parameters as
@@ -707,4 +667,49 @@ R   : ranger . el location
         (ranger-show-drives)))
     (when alt-option
       (call-interactively alt-option))))
+
+(defun list-to-radix-tree(l)
+  (--reduce-from (radix-tree-insert acc it t) radix-tree-empty l))
+
+(setq small (list-to-radix-tree '("molecular" "molecule" "mole" "appa" "appetizer" "applicative" "apple")))
+
+(setq vsbg (list-to-radix-tree '("molo" "molar" "molecular dynamics" "molecule" "mole" "appa" "appetizer" "applicative" "apple" "appar")))
+
+(require 'company)
+
+(defun radix-tree-keys(subtree prefix)
+  (let (keys '())
+    (radix-tree-iter-mappings (radix-tree-subtree subtree prefix)
+			                        (lambda (key val)
+				                        (!cons (concat prefix key) keys)))
+    keys))
+
+(defun get-candidates (prefix)
+  "Given a prefix return a list of matching words that begin with it"
+  (when (> (length prefix) 2)
+    (radix-tree-keys company-custom-dictionary--words-tree (downcase prefix))))
+
+(defun company-custom-dictionary2 (command &optional arg &rest ignored)
+  "RELOAD the mode to embed the changes!!! Company mode backend for a custom dictionary stored as a radix tree. force bind - redefines your tree."
+  (setq force-bind-ccd t)
+  (case command
+    ('init
+     (if (or (not (null force-bind-ccd)) (not (boundp 'company-custom-dictionary--words-tree)))
+         (progn (message "reloading tre..")(setq company-custom-dictionary--words-tree vsbg))))
+    ('prefix
+     (company-grab-word))
+    ('candidates
+     (radix-tree-keys company-custom-dictionary--words-tree (downcase arg)))
+    ('ignore-case
+     'keep-prefix)))
+
+;; (provide 'company-custom-dictionary)
+
+;; Push the mode to the list of company backends molecular dynamics dictionary:
+;; WARNING: ALL OTHER COMPLETIONS WILL BE DESTROYED (for some reason)
+;; (push 'company-custom-dictionary2 company-backends)
+;; TODO make function that opens shell in remote path on server
+;; als-tramp-browse-shell
+;; also to open shell in directories specified in slots
+;; 
 

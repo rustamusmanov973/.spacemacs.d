@@ -17,6 +17,7 @@
                                        ("dr" "ranger..")
                                        ("dd" "deer")
                                        ("dh" "helm find directory")
+                                       ("ep" "ep ??")
                                        ))
 ;; (print server-name)
 ;; (server-start)
@@ -25,10 +26,7 @@
 ;; emacs --eval $'(progn (set-variable \'server-name "gepy") (setq server-socket-dir "~/.emacs.d/servers/")(server-start))'
 ;; emacsclient -s "/Users/rst/.emacs.d/servers/gepy" --eval '(load-file "/tmp/gepy.el")'
 
-
-
-(if nil
-    (customize-save-variable 'abbreved-paths-rst '(
+(setq abbreved-paths-rst '(
                                                 "u" "/Users"
                                                 "o" "/opt"
                                                 "v" "/var"
@@ -49,7 +47,6 @@
                                                 "D" "/Users/rst/Desktop/"
                                                 ))
 
-  )
 (defun my-eval-string (string)
   (eval (car (read-from-string (format "(progn %s)" string)))))
 (defun map-plist (fn plist)
@@ -82,6 +79,7 @@
                 "fx" nil
                 "fxx" execute-file-auto
                 "fk" helm-bookmarks
+                "ep" hwd
                 "wx" ill-buffer-and-window
                 "k[" beginning-of-defun
                 "k]" (lambda () (interactive) (progn (beginning-of-defun)(evil-jump-item)))
@@ -92,13 +90,15 @@
                 "fek" (lambda () (interactive) (find-file "~/.spacemacs.d/keybindings.el"))
                 "fes" (lambda () (interactive) (find-file "~/.spacemacs.d/settings.el"))
                 "fet" (lambda () (interactive) (find-file "~/.spacemacs.d/transient_states.el"))
+                "feS" (lambda () (interactive) (find-file "~/.spacemacs.d/scratch.el"))
+                "feh" (lambda () (interactive) (find-file "~/.spacemacs.d/machines.el"))
                 "dhA" (lambda () (interactive) (helm-find-files-with-inp "/Applications/"))
                 )))
   (progn
     (map-plist
-     (lambda (x y) (plist-put rst-lk (concat "dr" x) (my-eval-string (concat " (lambda () (interactive) (ranger-go ?" x "))")))) abbreved-paths-rst)
+     (lambda (x y) (plist-put rst-lk (concat "dR" x) (my-eval-string (concat " (lambda () (interactive) (ranger-go ?" x "))")))) abbreved-paths-rst)
     (map-plist
-     (lambda (x y) (plist-put rst-lk (concat "dd" x) (my-eval-string (concat " (lambda () (interactive) (deer \"" y "\"))")))) abbreved-paths-rst)
+     (lambda (x y) (plist-put rst-lk (concat "dD" x) (my-eval-string (concat " (lambda () (interactive) (deer \"" y "\"))")))) abbreved-paths-rst)
     (apply #'spacemacs/set-leader-keys rst-lk)
     ))
 
