@@ -713,3 +713,5 @@ R   : ranger . el location
 ;; also to open shell in directories specified in slots
 ;; 
 
+
+ 
