@@ -1,5 +1,7 @@
-# -*- mode: org; -*-
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
 [[https://travis-ci.org/IvanMalison/dotfiles][file:https://travis-ci.org/IvanMalison/dotfiles.svg?branch=master]]
+
+***Test page, please ignore the foregoing content...***
 
 This document is best read at [[http://ivanmalison.github.io/dotfiles/]] or, of
 course, in emacs, as the internal links that follow are unlikely to work

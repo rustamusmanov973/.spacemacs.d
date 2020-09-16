@@ -1,3 +1,48 @@
+;; Elisp file for R coding with Emacs
+(set-frame-parameter nil 'fullscreen 'maximized)
+(setq ob-mermaid-cli-path "/Users/rst/node_modules/.bin/mmdc")
+
+;; Add MELPA repository and initialise the package manager
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/"))
+(package-initialize)
+
+;; Install use-package,in case it does not exist yet
+;; The use-package software will install all other packages as required
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+;; ESS configurationEmacs Speaks Statistics
+(use-package ess
+  :ensure t
+  )
+
+;; Auto completion
+(use-package company
+  :ensure t
+  :config
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 2)
+  (global-company-mode t)
+  )
+
+                                        ; Parentheses
+(use-package highlight-parentheses
+  :ensure t
+  :config
+  (progn
+    (highlight-parentheses-mode)
+    (global-highlight-parentheses-mode))
+  )
+
+
+
+(defcustom sber-mark-sbmk-org-link-store "metro"
+  "Where the melpa repo cloned to."
+  :type 'string)
+
   (defun my-reload-dir-locals-for-current-buffer ()
     "reload dir locals for the current buffer"
     (interactive)
@@ -55,7 +100,7 @@ current buffer's, reload dir-locals."
   )))
 
   (defun make_goku ()
-  (setq goku_output (shell-command-to-trimmed-string  "goku &; sleep 2; kill -9 $!"))
+    (setq goku_output (shell-command-to-trimmed-string  "(cmdpid=$BASHPID; (sleep 2; kill $cmdpid) & exec goku)"))
   (if (string-match "Done!" goku_output )
   (message "make_goku: OK")
   (progn
@@ -67,36 +112,43 @@ current buffer's, reload dir-locals."
 (defun my-after-save-actions ()
         "Used in `after-save-hook'."
         (message "After save activated")
-        (let* ((bfn buffer-file-name))
+        (let* ((bfn buffer-file-name)
+               (ssh-rc-file (concat-hdir ".bashrc_ssh")))
           (cond
-           ((member bfn (mapcar #'mac-concat-wdtf '(".profile" ".zprofile" ".zshrc" ".aliases" ".xonshrc")))
-            (mac-copy-file-to-hdir bfn)
+           ((member bfn (mapcar #'concat-wdtf '(".xonshrc" ".aliases" ".bash_profile")))
+            (copy-file-to-hdir bfn)
             (srv-copy-file-to-hdir bfn)
             (lom2-copy-file-to-rhdir bfn))
-           ((string-equal bfn (mac-concat-dcnf "karabiner.edn"))
+           ((member bfn (mapcar #'concat-wdtf '(".bashrc")))
+            (shell-command (format "tail -n +2 %s > %s" (enquote bfn) (enquote ssh-rc-file)))
+            (copy-file-to-hdir bfn)
+            (srv-copy-file-to-hdir bfn)(srv-copy-file-to-hdir ssh-rc-file)
+            (lom2-copy-file-to-rhdir bfn ".bashrc_rst")(lom2-copy-file-to-rhdir ssh-rc-file))
+           ((member bfn (mapcar #'concat-wdtf '(".bashrc_lom2")))
+            (lom2-copy-file-to-rhdir bfn ".bashrc"))
+           ((string-equal bfn (concat-dcnf "karabiner.edn"))
             (and (vdp) (say "Saving file"))(or (make_goku) (say "goku done, but use kar py file instead")))
-           ((string-equal bfn (mac-concat-dcnf "karabiner_prettified_before_python_inject.edn"))
+           ((string-equal bfn (concat-dcnf "karabiner_prettified_before_python_inject.edn"))
             (write_goku_with_py))
-           ((string-equal (file-name-directory bfn) mac-wlib)
-            (mac-copy-file-to-lb37 bfn)
+           ((string-equal (file-name-directory bfn) wlib)
+            (copy-file-to-lb37 bfn)
             (srv-copy-file-to-lb37 bfn)
-            ;; (lom2-copy-file-to-lb37 bfn)
+            (lom2-copy-file-to-lb37 bfn)
             )
-           ((string-equal bfn (mac-concat-wdtf "00-first.py"))
-            (mac-copy-file-to-ipython-startup bfn)
+           ((string-equal bfn (concat-wdtf "00-first.py"))
+            (copy-file-to-ipython-startup bfn)
             (srv-copy-file-to-ipython-startup bfn)
-            ;; (lom2-copy-file-to-ext37 bfn)
+            (lom2-copy-file-to-ipython-startup bfn)
             )
-           ((string-equal bfn (mac-concat-wdtf "lb_prms.py"))
-           (mac-copy-file-to-ext37 bfn)
+           ((string-equal bfn (concat-wdtf "lb_prms.py"))
+           (copy-file-to-ext37 bfn)
            (srv-copy-file-to-ext37 bfn)
-           ;; (lom2-copy-file-to-ext37 bfn)
+           (lom2-copy-file-to-ext37 bfn)
            )
-           ((string-equal (file-name-directory bfn) mac-ubin)
-            (debug)
+           ((string-equal (file-name-directory bfn) ubin)
             (srv-copy-file-to-ubin bfn)
             (lom2-copy-file-to-ubin bfn)
-           ;; .ssh, .spacemacs.d , .emacs.dk,  executables in 
+           ;; .ssh, .spacemacs.d , .emacs.dk,  executables in
            ))))
     (add-hook 'after-save-hook 'my-after-save-actions)
   (defun backward-kill-line (arg)
@@ -121,6 +173,7 @@ current buffer's, reload dir-locals."
             (setq nfn (s-replace "/Users/rst/lib/as/" "a" nfn))
             (setq nfn (s-replace "/Users/rst/lib/py/" "p" nfn))
             (setq nfn (s-replace "/Users/rst/lib/ss/" "s" nfn))
+            (setq nfn (s-replace "/Users/rst/bin/" "b" nfn))
             (vd 'nfn)
             ;; (message (kill-new nfn))
             (message nfn)
@@ -186,14 +239,28 @@ non-empty directories is allowed."
 
   (defun execute-file-auto ()
     (interactive)
-(setq args (read-string "With arg: "))
-    (save-buffer)
-    (message buffer-file-name)
-    (setq qbfn (concat "'" buffer-file-name "'"))
-    (setq scm (concat "chmod 777 " qbfn "; " qbfn " " args))
-    (vd 'scm)
-    (shell-command scm)
-    )
+    (let* ((args (read-string "With arg: "))
+           (qbfn (concat "'" buffer-file-name "'"))
+           (bufn (concat "exec_" (file-name-nondirectory buffer-file-name)))
+           (scm (concat "chmod 777 " qbfn "; echo sleeping; sleep .5; echo running; " qbfn " " args))
+           (timeout (pcase (read-string "Wait for how long [Default: execute immediately; a - 1s, b - 2s, c - 3s, d - 5s, e - 10 s, number - number s]: ")
+                      ("a" 1)
+                      ("b" 2)
+                      ("c" 3)
+                      ("d" 5)
+                      ("e" 10)
+                      (t 0)
+                      )))
+           (save-buffer)
+           (message buffer-file-name)
+           (vd 'scm)
+           (shell-in-dir "/Users/rst/" nil nil bufn)
+           (message "Sitting for %s" timeout)
+           (sit-for timeout)
+           (comint-send-string bufn (concat scm "\n"))
+           ;; (comint-send-string "exec_sys_activate_file_menu" "echo kkk\n")
+           ;; (display-buffer-at-bottom bufn '(bufn))
+    ))
 
   (defun ace-split (buf-name ori)
     (interactive)
@@ -216,9 +283,14 @@ non-empty directories is allowed."
                      ("jup" .      (1 "jupyter-notebook --no-browser --port 8888"))
                      ("klg" .      (2 "keylogger"))
                      ("jpf_gpu" .  (3 "while true; do ssh -N -L 51515:localhost:51515 gpu || echo 'retrying...'; done"))
-                     ("jpf_l2" .   (4 "hile true; do ssh -N -L 51517:localhost:51517 lom || echo 'retrying...'; done"))
+                     ("jpf_l2" .   (4 "while true; do ssh -N -L 51516:localhost:51516 lom2 || echo 'retrying...'; done"))
                      ("pypf_srv" . (5 "while true; do ssh -N -R 9170:localhost:9170 gpu || echo 'retrying...'; done"))
-                     ("als_ppf" .  (6 "hile true; do ssh -vvv -p 22022 -N -R9000:localhost:9000 rustam@alesia.store || echo 'retrying...'; done")))
+                     ("ligr" .     (6 "sshfs srv:/home/domain/data/rustam/ ~/r -o reconnect,auto_cache,defer_permissions,noappledouble,Compression=no -ovolname=srv"))
+                     ("ems-main" .     (7 "ems main"))
+                     ("ems-gepy" .     (8 "ems gepy"))
+                     ;; ("pypf_lom2" . (6 "while true; do ssh -N -R 9170:localhost:9170 gpu || echo 'retrying...'; done"))
+                     ("als_ppf" .  (9 "hile true; do ssh -vvv -p 22022 -N -R9000:localhost:9000 rustam@alesia.store || echo 'retrying...'; done"))
+                     )
                      )
   (defun gepy_very_bad ()
     (setq proc23 (start-process "jup" "jup" "jupyter-notebook" "--no-browser" "--port" "5555"))
@@ -227,7 +299,7 @@ non-empty directories is allowed."
     (start-process "klg" "klg" "keylogger")
     (start-process "klg" "klg" "keylogger")
     (start-process-shell-command "jpf_gpu" "ge:jpf_gpu" "while true; do ssh -N -L 51515:localhost:51515 gpu2 || echo 'retrying...'; done")
-    (start-process-shell-command "jpf_l2" "ge:jpf_l2" "hile true; do ssh -N -L 51517:localhost:51517 lom2 || echo 'retrying...'; done")
+    (start-process-shell-command "jpf_l2" "ge:jpf_l2" "hile true; do ssh -N -L 51516:localhost:51516 lom2 || echo 'retrying...'; done")
     (start-process-shell-command "pypf_srv" "ge:pypf_srv" "while true; do ssh -N -R 9170:localhost:9170 gpu || echo 'retrying...'; done")
     (start-process-shell-command "als_ppf" "ge:als_ppf" "hile true; do ssh -vvv -p 22022 -N -R9000:localhost:9000 rustam@alesia.store || echo 'retrying...'; done")
     )
@@ -288,7 +360,7 @@ non-empty directories is allowed."
 (defun client-save-kill-emacs (&optional display)
 "This is a function that can bu used to shutdown save buffers and
 shutdown the emacs daemon. It should be called using
-emacsclient -e '(client-save-kill-emacs)'.  This function will
+emacsclient -e '(client-save-kill-emacs)'.  This function will wS
 check to see if there are any modified buffers or active clients
 or frame.  If so an x window will be opened and the user will
 be prompted."
@@ -395,6 +467,7 @@ only if external addressbook-bookmark package is installed."
     )
   )
 
+
 (defun gepy-launch-process-in-eshell (buf-name command &optional win-num)
   (when (not (buffer-exists-if buf-name))
       (let ((eshell-buffer-name buf-name))
@@ -416,11 +489,12 @@ only if external addressbook-bookmark package is installed."
     (start-process-shell-command prefixed-proc-alias prefixed-proc-alias (caddr (assoc proc-alias gepy-alist)) ))
   )
 (defun gepy-start-all ()
+  (interactive)
   (loop for x in gepy-alist
         do (gepy-start (car x)))
+  (start-py37-shell-proc)
   )
 ;; (gepy-start-all)
-
 ;; ( process-live-p (get-process "ge:jup"))
 ;; (kill-process ( get-process "ge:jup"))
 (defun helm-mini-ge ()
@@ -572,7 +646,7 @@ buffer preview will still display."
 
 (when (string= system-type "darwin")
   (setq dired-use-ls-dired nil))
-(progn (message "my_path:")(message my_path))
+;; (progn (message "my_path:")(message my_path))
 ;; (load "~/.hammerspoon/spacehammer.el")
 (defun eww-new (url)
   (interactive
@@ -581,6 +655,7 @@ buffer preview will still display."
     (switch-to-buffer (generate-new-buffer "eww"))
     (eww-mode)
     (eww url))
+
 
 
 (defun helm-find-files-with-inp (input)
@@ -711,7 +786,355 @@ R   : ranger . el location
 ;; TODO make function that opens shell in remote path on server
 ;; als-tramp-browse-shell
 ;; also to open shell in directories specified in slots
-;; 
+;;
+(defun replace-in-string (what with in)
+  (replace-regexp-in-string (regexp-quote what) with in nil 'literal))
+
+(defun sber-mark-insert-org-link ()
+  (interactive)
+  (let* ((prod-name      (read-string "Введите наименование продукта: "))
+         (sber-mark-link (concat "https://sbermarket.ru/" sber-mark-sbmk-org-link-store "/search?keywords=" (replace-in-string " " "+" prod-name))))
+    (vd 'prod-name) (vd 'sber-mark-link)(org-insert-link nil sber-mark-link prod-name))
+  (newline))
 
 
- 
+(require 'org)
+
+(defun gokuize-string-at-point ()
+  (interactive)
+  (let ((region (buffer-substring-no-properties (region-beginning) (region-end) )))
+    (kill-region (region-beginning) (region-end))
+    (kill-new (message (join (map 'list (lambda (x) (cdr (assoc x symbol-to-kar-py-symbol)))
+                                  (reverse (cdr (reverse (cdr (s-split "" region)))))) " ")))
+    (yank)))
+
+
+
+(defun chmod-file-777 ()
+    (interactive)
+    (let* (
+           (qbfn (concat "'" buffer-file-name "'"))
+           (scm (concat "chmod 777 " qbfn ))
+           )
+      (shell-command scm)
+      (save-buffer)
+      (message "chmod 777: %s : OK" qbfn)
+      ))
+(defun start-py37-shell-proc ()
+  (setq py37-shell-proc (run-python "/Users/rst/miniconda/envs/py37/bin/ipython --simple-prompt -i" t t))
+  (with-current-buffer (process-buffer py37-shell-proc) (rename-buffer "py37_shell_1"))
+  )
+(defun start-py27-shell-proc ()
+  (setq py27-shell-proc (run-python "/Users/rst/miniconda/envs/py27/bin/ipython --simple-prompt -i" t t))
+  (with-current-buffer (process-buffer py27-shell-proc) (rename-buffer "py27_shell_1"))
+  )
+
+
+(defun python-shell-send-string-by-sh-name (cmd sh-name)
+    (python-shell-send-string cmd (get-buffer-process sh-name)))
+
+(defun send-to-py37-shell-1 (cmd)
+  (python-shell-send-string-by-sh-name cmd "py37_shell_1"))
+
+(defun get-string-from-file (filePath)
+  "Return filePath's file content."
+  (with-temp-buffer
+    (insert-file-contents filePath)
+    (buffer-string)))
+
+(defun get-server-name ()
+  (interactive)
+  (message server-name))
+
+
+(defun python-shell-send-region-by-sh-name (start end &optional send-main msg sh-name)
+  "Send the region delimited by START and END to inferior Python process.
+When optional argument SEND-MAIN is non-nil, allow execution of
+code inside blocks delimited by \"if __name__== \\='__main__\\=':\".
+When called interactively SEND-MAIN defaults to nil, unless it's
+called with prefix argument.  When optional argument MSG is
+non-nil, forces display of a user-friendly message if there's no
+process running; defaults to t when called interactively."
+  (interactive
+   (list (region-beginning) (region-end) current-prefix-arg t))
+  (let* ((string (python-shell-buffer-substring start end (not send-main)))
+         (process (python-shell-get-process-or-error msg))
+         (original-string (buffer-substring-no-properties start end))
+         (_ (string-match "\\`\n*\\(.*\\)" original-string)))
+    (message "Sent: %s..." (match-string 1 original-string))
+    (python-shell-send-string-by-sh-name string sh-name)))
+(defun python-shell-send-region-to-py37-1 ()
+  (python-shell-send-region-by-sh-name (region-beginning) (region-end) nil nil "py37_shell_1"))
+
+(require 'cl-lib)
+
+(defun get-smkb-beg-end ()
+  (let ((out-beg-end '()))
+    (with-current-buffer "karabiner_prettified_before_python_inject.edn"
+      (save-excursion (beginning-of-buffer)
+                      (search-forward "BEGIN_smkb_align") (push (+ 1 (point-at-eol)) out-beg-end)
+                      (search-forward "END_smkb_align") (nconc out-beg-end (list (- (point-at-bol) 1)) )
+                      out-beg-end)
+           )))
+
+;; (delete-overlay ol21)
+
+
+;; (defun my--auto-align-function (ol &rest _args)
+;;   (message "my--auto-align-function started: %s | %s" ol _args)
+;;   (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)\\[")
+;;   (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)\\[\\[")
+;;   (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)\\[[^\\[]*\\[[^\\[]*\\[[^\\[]*$")
+;;   (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)[0-9]\\]\\[.*$")
+;;   (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)0\\]\\].*$")
+;;   (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)\\S-+?\\]\\]$")
+;;   )
+(defun align-smkb ()
+  (interactive)
+  (with-current-buffer "karabiner_prettified_before_python_inject.edn"
+    (let* ((beg-end (get-smkb-beg-end))
+           (smkb-align-start-point (car beg-end))
+           (smkb-align-end-point (cadr beg-end))
+           )
+      (message "%s-%s" smkb-align-end-point smkb-align-start-point)
+      (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)\\[")
+      (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)\\[\\[")
+      (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)\\[[^\\[]*\\[[^\\[]*\\[[^\\[]*$")
+      (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)[0-9]\\]\\[.*$")
+      (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)0\\]\\].*$")
+      (align-regexp smkb-align-start-point smkb-align-end-point "\\(\\s-*?\\)\\S-+?\\]\\]$"))))
+;; (require 'cl-lib)
+
+;; (defvar my--auto-align-overlays nil)
+;; (make-variable-buffer-local 'my--auto-align-overlays)
+
+;; (defun my-auto-align (beg end regexp)
+;;   (interactive "r\nsRegexp: ")
+;;   (let ((ol (make-overlay beg end)))
+;;     (overlay-put ol 'evaporate t)
+;;     (overlay-put ol 'my--auto-align-regexp regexp)
+;;     (overlay-put ol 'modification-hooks '(my--auto-align-function))
+;;     (push ol my--auto-align-overlays)
+;;     (add-hook 'post-command-hook 'my--auto-align-pch nil t)))
+
+;; (defun my--auto-align-function (ol &rest _args)
+;;   (cl-pushnew ol my--auto-align-overlays)
+;;   (add-hook 'post-command-hook 'my--auto-align-pch nil t))
+
+;; (defun my--auto-align-pch ()
+;;   (dolist (ol my--auto-align-overlays)
+;;     (align-regexp (overlay-start ol) (overlay-end ol)
+;;                   (concat "\\(\\s-*\\)" (overlay-get ol 'my--auto-align-regexp))
+;;                   1 align-default-spacing))
+;;   (setq my--auto-align-overlays nil)
+;;   (remove-hook 'post-command-hook 'my--auto-align-pch))
+;; (progn
+  ;; (delete-all-overlays (get-buffer "karabiner_prettified_before_python_inject.edn"))
+;;   (setq ol21 (make-overlay (car (get-smkb-beg-end)) (cadr (get-smkb-beg-end)) (get-buffer "karabiner_prettified_before_python_inject.edn")))
+;;   (overlay-put ol21 'face '((background-color . "azure2")))
+;;   (overlay-put ol21 'modification-hooks '(my--auto-align-function))
+;;   )
+
+
+
+(defun sber-market-complete-link (&optional arg)
+  "Completion function for ref links.
+Optional argument ARG Does nothing."
+  (let ((label))
+    (setq label (completing-read "label: " '("aaa" "bbb\n lala\\nla\n\s vasea")))
+    (format "%s" label)))
+
+(defun sber-market-follow (label)
+  "On clicking goto the LABEL.
+Navigate back with \`\\[org-mark-ring-goto]'."
+  (let ((sb-link (concat "https://sbermarket.ru/"  sber-mark-sbmk-org-link-store "/search?keywords=" (replace-in-string " " "+" label))))
+    (save-buffer 0)
+    ;; (append-to-file (format "| [[ %s ][ %s ]] | %s | \n" sb-link label sb-link) nil "/Users/rst/org/sberMarket.org")
+    (append-to-file (format "%s\n" sb-link label sb-link) nil "/Users/rst/org/sberMarket.org")
+    )
+  ;; (save-excursion (goto-char (point-max)) (org-table-align))
+  ;; (save-buffer 0)
+  )
+;; (with-current-buffer "sberMarket.org"
+  ;; (sber-market-follow "hello"))
+;; (defun ask-user-about-supersession-threat (fn)
+;;   "blatantly ignore files that changed on disk"
+;;   )
+;; (defun ask-user-about-lock (file opponent)
+;;   "always grab lock"
+;;   t)
+;; (global-auto-revert-mode -1)
+
+;; (defun sber-market-complete-link (&optional arg)
+;;   "Completion function for ref links.
+;; Optional argument ARG Does nothing."
+;;   (let ((label))
+;;     (setq label (completing-read "label: " '("aaa" "bbb\n lala\\nla\n\s vasea")))
+;;     (format "prod:%s" label)))
+(defun org-ref-ref-face-fn (label)
+  "Return a face for a ref link."
+  (save-match-data
+    (cond
+     ((or (not org-ref-show-broken-links)
+	        (member label (org-ref-get-labels)))
+      'org-ref-ref-face)
+     (t
+      'font-lock-warning-face))))
+(org-link-set-parameters "clear-cart"
+  :follow (lambda (text)  (save-excursion (forward-line 2) (evil-visual-line)(goto-char (point-max))(delete-region (region-beginning) (region-end))))
+  :face 'org-ref-ref-face-fn
+  )
+(defun sber-mark-insert-add-cart-link ()
+  (interactive)
+  (let* ((prod-name      (read-string "Введите наименование продукта: "))
+         (sber-mark-link (concat "sbmk:" prod-name)))
+     (org-insert-link nil sber-mark-link prod-name))
+  (newline))
+
+(org-link-set-parameters "sbmk"
+                         :follow #'sber-market-follow
+                         :face #'org-warning
+                         )
+
+  (defun get-local-py-helm-functions ()
+    (map 'list (lambda (x) (nth 1 (s-match "def \\(.*\\)(" x)))
+        (--filter (s-match "^def " it)
+                  (seq-drop-while (lambda (x) (not (string-equal "# HELM_COMPLETION_START" x))) (with-current-buffer
+                                                                                                    (find-file-noselect "/Users/rst/wrk/lib/local.py")
+                                                                                                  (split-string
+                                                                                                   (save-restriction
+                                                                                                     (widen)
+                                                                                                     (buffer-substring-no-properties
+                                                                                                      (point-min)
+                                                                                                      (point-max)))
+                                                                                                   "\n" t))))))
+
+
+  (setq local-py-helm-functions
+        '((name . "HELM at the Emacs")
+          (candidates . get-local-py-helm-functions)
+          (action . (lambda (candidate)
+                      (message "Execing: %s()" candidate)
+                      (send-to-py37-shell-1 (concat candidate "()\n"))
+                      ))))
+
+(defun my-local-py-helm ()
+  (interactive)
+  (helm :sources '(local-py-helm-functions)))
+
+;; make these keys behave like normal browser
+
+
+;; IMPORTANT !!!!!!!!!!!
+(require 'xwidget)
+(evil-set-initial-state 'xwidget-webkit-mode 'emacs)
+;; (add-hook 'xwidget-webkit-mode-hook
+
+(define-key xwidget-webkit-mode-map [mouse-4] 'xwidget-webkit-scroll-down)
+(define-key xwidget-webkit-mode-map [mouse-5] 'xwidget-webkit-scroll-up)
+(define-key xwidget-webkit-mode-map (kbd "<up>") 'xwidget-webkit-scroll-down)
+(define-key xwidget-webkit-mode-map (kbd "<down>") 'xwidget-webkit-scroll-up)
+(define-key xwidget-webkit-mode-map (kbd "M-w") 'xwidget-webkit-copy-selection-as-kill)
+(define-key xwidget-webkit-mode-map (kbd "C-c") 'xwidget-webkit-copy-selection-as-kill)
+
+;; make xwidget default browser (not for now... maybe in the future!)
+(setq browse-url-browser-function (lambda (url session)
+                                    (other-window 1)
+                                    (xwidget-browse-url-no-reuse url)))
+
+(setq helm-google-suggest-default-browser-function (lambda (url session)
+                                    (other-window 1)
+                                    (xwidget-browse-url-no-reuse url)))
+;; adapt webkit according to window configuration change automatically
+;; without this hook, every time you change your window configuration,
+;; you must press 'a' to adapt webkit content to new window size
+(add-hook 'window-configuration-change-hook (lambda ()
+                                              (when (equal major-mode 'xwidget-webkit-mode)
+                                                (xwidget-webkit-adjust-size-dispatch))))
+
+;; by default, xwidget reuses previous xwidget window,
+;; thus overriding your current website, unless a prefix argument
+;; is supplied
+;;
+;; This function always opens a new website in a new window
+(defun xwidget-browse-url-no-reuse (url &optional session)
+  (interactive (progn
+                 (require 'browse-url)
+                 (browse-url-interactive-arg "xwidget-webkit URL: "
+                                             )))
+  (xwidget-webkit-browse-url url t)
+  (buffer-name)
+  )
+
+;; adapt webkit according to window configuration chagne automatically
+;; without this hook, every time you change your window configuration,
+;; you must press 'a' to adapt webkit content to new window size
+(add-hook 'window-configuration-change-hook (lambda ()
+			   (when (equal major-mode 'xwidget-webkit-mode)
+			     (xwidget-webkit-adjust-size-dispatch))))
+
+;; )
+
+
+
+;; by default, xwidget reuses previous xwidget window,
+;; thus overriding your current website, unless a prefix argument
+;; is supplied
+;;
+;; This function always opens a new website in a new window
+
+
+(use-package xwwp-full
+  :load-path "~/.emacs.d/xwwp"
+  :custom
+  (xwwp-follow-link-completion-system 'helm)
+  :bind (:map xwidget-webkit-mode-map
+              ("v" . xwwp-follow-link)
+              ("t" . xwwp-ace-toggle)))
+
+;; Time measurements
+;; (require 'benchmark)
+;; (let (value) (dotimes (number 3 value)
+;;                (setq value  (cons (benchmark-elapse
+;;                                          ) value )  )))
+
+;; (benchmark-elapse
+;;   (with-current-buffer "foo.org"
+;;     (my/regex-global-replace "\\(*+.*\\)\n\\(.*\\)\n\\(\\s-+:PROPERTIES:\\)" "\\1 \\2\n\\3")))
+;; (defun my/regex-global-replace (regex1 regex2)
+;;   "Replace `regex1' with `regex2' in a buffer."
+;;   (goto-char (point-min))
+;;   (while (re-search-forward regex1 nil t)
+;;     (replace-match regex2)))
+
+(defun my/helm-find-file-recursively ()
+  (interactive)
+  "Recursively find files in glob manner, in the specified directory."
+  (helm-find 'ask-for-dir))
+
+(defun my/last-active-comint-send-region ()
+  (interactive)
+  (copy-region-as-kill (region-beginning) (region-end))
+  (spacemacs/alternate-window)
+  (comint-interrupt-subjob)
+  (yank)
+  (comint-send-input)
+  (spacemacs/alternate-window)
+)
+(defun my/org-browse-url (&optional query)
+  (interactive)
+  (let
+      (
+       (query (or query (read-string "URL:"))))
+    (find-file (shell-command-to-trimmed-string (concat "/Users/rst/lib/py/org-brower-one-url.py '" query "'"))))
+  )
+(defun list-of-lists-to-org-table (lol)
+  (let ((buf (get-buffer-create "*org-tb*"))
+        )
+    (with-current-buffer buf
+      (erase-buffer)
+      (mapcar (lambda (x)
+                (mapcar (lambda (y) (insert (format "%s " y))) x)(insert "\n")) lol)
+      (table-capture 1 (point-max) " " "\n")
+      (buffer-substring-no-properties (point-min) (point-max))
+      )))

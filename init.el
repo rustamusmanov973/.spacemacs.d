@@ -29,11 +29,15 @@ This function should only modify configuration layer settings."
 
    ;; List of additional paths where to look for configuration layers.
    ;; Paths must have a trailing slash (i.e. `~/.mycontribs/')
-   dotspacemacs-configuration-layer-path '()
+   dotspacemacs-configuration-layer-path '("~/.spacemacs.d/")
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(perl5
+   '(php
+     mermaid
+     swift
+     perl5
+     evil-russian
      csv
      yaml
      vimscript
@@ -360,7 +364,7 @@ It should only modify the values of Spacemacs settings."
    ;; variable with `dotspacemacs-maximized-at-startup' in OSX to obtain
    ;; borderless fullscreen. (default nil)
    dotspacemacs-undecorated-at-startup nil
-
+   
    ;; A value from the range (0..100), in increasing opacity, which describes
    ;; the transparency level of a frame when it's active or selected.
    ;; Transparency can be toggled through `toggle-transparency'. (default 90)
@@ -541,16 +545,25 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(bmkp-last-as-first-bookmark-file "/Users/rst/.emacs.d/.cache/bookmarks")
+ '(LaTeX-electric-left-right-brace t)
+ '(TeX-engine 'xetex)
+ '(bmkp-last-as-first-bookmark-file "~/.emacs.d/.cache/bookmarks")
+ '(browse-url-browser-function 'browse-url-default-browser)
  '(browse-url-chrome-program
    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+ '(counsel-web-engine 'google)
  '(eclim-eclipse-dirs
    '("/Users/rst/eclipse/java-2020-03/Eclipse.app/Contents/Eclipse"))
  '(eclim-executable "/Users/rst/.p2/pool/plugins/org.eclim_2.8.0/bin/eclim")
+ '(helm-exit-idle-delay 0)
+ '(helm-google-idle-delay 0)
  '(multishell-activate-command-key t)
+ '(org-agenda-files '("~/org/comparisons.org"))
  '(package-selected-packages
-   '(realgud test-simple loc-changes load-relative company-plsense ssh-deploy zones telega pdf-tools multishell pubmed csv-mode yaml-mode utop tuareg caml tide typescript-mode seeing-is-believing rvm ruby-tools ruby-test-mode ruby-refactor ruby-hash-syntax rubocopfmt rubocop rspec-mode robe rbenv rake ocp-indent ob-elixir mvn minitest meghanada maven-test-mode lsp-java groovy-mode groovy-imports pcache gradle-mode flycheck-ocaml merlin flycheck-credo emojify emoji-cheat-sheet-plus dune company-emoji chruby bundler inf-ruby alchemist elixir-mode eclim vimrc-mode helm-gtags ggtags dactyl-mode counsel-gtags shr-tag-pre-highlight org-edit-latex scihub svg-clock w3m notmuch ox-reveal org-noter spotlight xwidgete jupyter ob-ipython clojure-snippets cider-eval-sexp-fu cider sesman queue parseedn parseclj a applescript-mode clojure-mode yasnippet-snippets yapfify xterm-color ws-butler writeroom-mode winum which-key web-mode web-beautify vterm volatile-highlights vi-tilde-fringe uuidgen use-package unfill treemacs-projectile treemacs-persp treemacs-magit treemacs-icons-dired treemacs-evil toc-org tern terminal-here tagedit symon symbol-overlay string-inflection spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode restart-emacs ranger rainbow-delimiters pytest pyenv-mode py-isort pug-mode prettier-js posframe popwin pippel pipenv pip-requirements pcre2el password-generator paradox overseer orgit org-projectile org-present org-pomodoro org-mime org-download org-cliplink org-bullets org-brain open-junk-file nodejs-repl nameless mwim move-text mmm-mode markdown-toc magit-svn magit-section magit-gitflow macrostep lsp-ui lsp-python-ms lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hybrid-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-xref helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-org helm-mode-manager helm-make helm-lsp helm-ls-git helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-pos-tip flycheck-package flycheck-elsa flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-snipe evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emr emmet-mode elisp-slime-nav ein editorconfig dumb-jump dotenv-mode diminish devdocs define-word dap-mode cython-mode company-web company-lua company-anaconda column-enforce-mode clean-aindent-mode centered-cursor-mode browse-at-remote blacken auto-yasnippet auto-highlight-symbol auto-compile aggressive-indent ace-link ace-jump-helm-line ac-ispell))
+   '(page-break-lines docker helm-google counsel-web shackle ob-mermaid mermaid-mode github-search ess google google-maps highlight xwwp-follow-link-helm xwwp f3 google-this interleave slime xonsh-mode hyperspace ob-applescript markdown-preview-eww helm-eww eww-lnum org-noter-pdftools php-mode org-ref sx apples-mode applescript-mode swift-mode biblio company-reftex company-auctex auctex org-pdftools realgud test-simple loc-changes load-relative company-plsense ssh-deploy zones telega pdf-tools multishell pubmed csv-mode yaml-mode utop tuareg caml tide typescript-mode seeing-is-believing rvm ruby-tools ruby-test-mode ruby-refactor ruby-hash-syntax rubocopfmt rubocop rspec-mode robe rbenv rake ocp-indent ob-elixir mvn minitest meghanada maven-test-mode lsp-java groovy-mode groovy-imports pcache gradle-mode flycheck-ocaml merlin flycheck-credo emojify emoji-cheat-sheet-plus dune company-emoji chruby bundler inf-ruby alchemist elixir-mode eclim vimrc-mode helm-gtags ggtags dactyl-mode counsel-gtags org-edit-latex scihub svg-clock w3m notmuch ox-reveal org-noter spotlight xwidgete jupyter ob-ipython clojure-snippets cider-eval-sexp-fu cider sesman queue parseedn parseclj a clojure-mode yasnippet-snippets yapfify xterm-color ws-butler writeroom-mode winum which-key web-mode web-beautify vterm volatile-highlights vi-tilde-fringe uuidgen use-package unfill treemacs-projectile treemacs-persp treemacs-magit treemacs-icons-dired treemacs-evil toc-org tern terminal-here tagedit symon symbol-overlay string-inflection spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode restart-emacs ranger rainbow-delimiters pytest pyenv-mode py-isort pug-mode prettier-js posframe popwin pippel pipenv pip-requirements pcre2el password-generator paradox overseer orgit org-projectile org-present org-pomodoro org-mime org-download org-cliplink org-bullets org-brain open-junk-file nodejs-repl nameless mwim move-text mmm-mode markdown-toc magit-svn magit-section magit-gitflow macrostep lsp-ui lsp-python-ms lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hybrid-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-xref helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-org helm-mode-manager helm-make helm-lsp helm-ls-git helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-pos-tip flycheck-package flycheck-elsa flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-snipe evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emr emmet-mode elisp-slime-nav ein editorconfig dumb-jump dotenv-mode diminish devdocs define-word dap-mode cython-mode company-web company-lua company-anaconda column-enforce-mode clean-aindent-mode centered-cursor-mode browse-at-remote blacken auto-yasnippet auto-highlight-symbol auto-compile aggressive-indent ace-link ace-jump-helm-line ac-ispell))
  '(paradox-github-token t)
+ '(pdf-tools-handle-upgrades nil)
+ '(ranger-preview-delay 1.5)
  '(safe-local-variable-values
    '((ssh-deploy-script lambda nil
                         (let
@@ -568,8 +581,11 @@ This function is called at the very end of Spacemacs initialization."
      (javascript-backend . tide)
      (javascript-backend . tern)
      (javascript-backend . lsp)))
+ '(sber-mark-sbmk-org-link-store "auchan")
  '(scihub-homepage "https://sci-hub.im" t)
- '(tramp-default-method "ssh"))
+ '(shell-file-name "/usr/local/bin/bash")
+ '(tramp-default-method "ssh")
+ '(vterm-shell "/usr/local/bin/bash"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

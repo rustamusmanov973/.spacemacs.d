@@ -18,6 +18,7 @@
                                        ("dd" "deer")
                                        ("dh" "helm find directory")
                                        ("ep" "ep ??")
+                                       ("e" "errors + my/eval")
                                        ))
 ;; (print server-name)
 ;; (server-start)
@@ -70,7 +71,7 @@
                 "iSc" yas-new-snippet
                 "fy" nil
                 "fy" nil
-                "fyy" (lambda () (interactive) (message (kill-new (buffer-file-name))))
+                "fyy" (lambda () (interactive) (message (kill-new (if (buffer-file-name) (buffer-file-name) (buffer-name)))))
                 "fyf" copy-file-name-nondirectory
                 "fyd" copy-file-name-directory
                 "fyr" nil
@@ -78,6 +79,7 @@
                 "fyrg" copy-rel-path-goku-key
                 "fx" nil
                 "fxx" execute-file-auto
+                "fxc" chmod-file-777
                 "fk" helm-bookmarks
                 "ep" hwd
                 "wx" ill-buffer-and-window
@@ -93,6 +95,12 @@
                 "feS" (lambda () (interactive) (find-file "~/.spacemacs.d/scratch.el"))
                 "feh" (lambda () (interactive) (find-file "~/.spacemacs.d/machines.el"))
                 "dhA" (lambda () (interactive) (helm-find-files-with-inp "/Applications/"))
+                "ю" sber-mark-insert-add-cart-link
+                ;; "bm" (lambda () (interactive) (messages-buffer))
+                ;; "bm" (lambda () (interactive) (if (buffer-exists-if "*Messages*") (if window-) (select-window (get-buffer-window "*Messages*"))(messages-buffer)))
+                ;; "bm" messages-buffer
+                "'" sh-cd
+                "er" (lambda () (interactive) (my/last-active-comint-send-region))
                 )))
   (progn
     (map-plist
@@ -101,13 +109,22 @@
      (lambda (x y) (plist-put rst-lk (concat "dD" x) (my-eval-string (concat " (lambda () (interactive) (deer \"" y "\"))")))) abbreved-paths-rst)
     (apply #'spacemacs/set-leader-keys rst-lk)
     ))
-
+(spacemacs/declare-prefix-for-mode 'clojure-mode "a" "Align ...")
+(spacemacs/set-leader-keys-for-minor-mode 'clojure-mode  "aa" 'align-smkb)
 (spacemacs/declare-prefix-for-mode 'emacs-lisp-mode "m" "Mark ...")
+(spacemacs/set-leader-keys-for-minor-mode 'emacs-lisp-mode  "m" nil)
 (spacemacs/set-leader-keys-for-minor-mode 'emacs-lisp-mode  "m" nil)
 (spacemacs/set-leader-keys-for-minor-mode 'emacs-lisp-mode  "[" 'beginning-of-defun)
 (spacemacs/set-leader-keys-for-minor-mode 'emacs-lisp-mode  "]" (lambda () (interactive) (progn (beginning-of-defun)(evil-jump-item))))
 (spacemacs/set-leader-keys-for-minor-mode 'emacs-lisp-mode  "." (lambda () (interactive) (spacemacs/defun-jump-transient-state-transient-state/end-of-defun)))
 (spacemacs/set-leader-keys-for-minor-mode 'emacs-lisp-mode  "mf" 'mark-defun)
+(spacemacs/set-leader-keys-for-minor-mode 'python-mode "sP" (lambda () (interactive) (python-shell-send-region-to-py37-1)))
+(spacemacs/set-leader-keys-for-minor-mode 'python-mode "sl" (lambda () (interactive) (progn
+                                                                                       (beginning-of-line)
+                                                                                       (setq this-command-keys-shift-translated t)
+                                                                                       (call-interactively 'end-of-line)
+                                                                                       (setq this-command-keys-shift-translated nil)
+                                                                                       )))
 (defvar treemacs-node-visit-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "s")        #'treemacs-visit-node-vertical-split)
@@ -120,3 +137,36 @@
     (define-key map (kbd "x")        #'treemacs-visit-node-in-external-application)
     map)
   "Keymap for node-visiting commands in `treemacs-mode'.")
+;; make these keys behave like normal browser
+(define-key xwidget-webkit-mode-map [mouse-4] 'xwidget-webkit-scroll-down)
+(define-key xwidget-webkit-mode-map [mouse-5] 'xwidget-webkit-scroll-up)
+(define-key xwidget-webkit-mode-map (kbd "<up>") 'xwidget-webkit-scroll-down)
+(define-key xwidget-webkit-mode-map (kbd "<down>") 'xwidget-webkit-scroll-up)
+(define-key xwidget-webkit-mode-map (kbd "M-w") 'xwidget-webkit-copy-selection-as-kill)
+(define-key xwidget-webkit-mode-map (kbd "C-c") 'xwidget-webkit-copy-selection-as-kill)
+
+;; adapt webkit according to window configuration chagne automatically
+;; without this hook, every time you change your window configuration,
+;; you must press 'a' to adapt webkit content to new window size
+(add-hook 'window-configuration-change-hook (lambda ()
+			   (when (equal major-mode 'xwidget-webkit-mode)
+			     (xwidget-webkit-adjust-size-dispatch))))
+
+;; by default, xwidget reuses previous xwidget window,
+;; thus overriding your current website, unless a prefix argument
+;; is supplied
+;;
+;; This function always opens a new website in a new window
+
+;; (setq proc_youtube
+;;  (async-start
+;;   `(lambda ()
+;;      ,(xwidget-browse-url-no-reuse (concat "https://www.youtube.com/results?search_query=" "apple")))))
+;; (process-buffer proc_youtube)
+;; ;; make xwidget default browser
+
+(setq browse-url-browser-function (lambda (url session)
+				    (other-window 1)
+				    (xwidget-browse-url-no-reuse url)))
+
+(global-set-key (kbd "C-c o f") 'my/helm-find-file-recursively)

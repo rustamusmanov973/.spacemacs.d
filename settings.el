@@ -1,27 +1,70 @@
-(package-initialize)
+ (package-initialize)
+
+;; In order to automatically start RefTeX when you open a LaTeX file add the following code to your init file
+;; Turn on RefTeX in AUCTeX
+(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+;; Activate nice interface between RefTeX and AUCTeX
+(setq reftex-plug-into-AUCTeX t)
+
+
+(setq TeX-auto-save t)  
+(setq TeX-parse-self t)  
+(setq-default TeX-master nil)  
+;; https://www.emacswiki.org/emacs/ExecPath
+;; (setq exec-path (append exec-path '("/usr/local/texlive/2020basic/bin/x86_64-darwin")))
+(setenv "PATH" "/usr/local/texlive/2020basic/bin/x86_64-darwin:$PATH" t)
+(use-package pdf-tools
+  :ensure t
+  :config
+  (custom-set-variables
+   '(pdf-tools-handle-upgrades nil)) ; Use brew upgrade pdf-tools instead.
+  (setq pdf-info-epdfinfo-program "/usr/local/bin/epdfinfo"))
 (pdf-tools-install)
-;; (require 'xonsh-mode)
-;; (require 'pdf-tools)
-(require 'ob-ipython)
-(add-to-list 'org-src-lang-modes '("jupyter" . python))
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((python . t)
-   (shell . t)
-   (js . t)
-   (clojure . t)
-   (emacs-lisp . t)
-   (ipython . t)
-   (jupyter . t)
-   ))
-(org-babel-jupyter-override-src-block "python")
+;; ;; (require 'xonsh-mode)
+;; ;; (require 'pdf-tools)
+;; (require 'ob-ipython)
+;; (add-to-list 'org-src-lang-modes '("jupyter" . python))
+;; (org-babel-do-load-languages
+;;  'org-babel-load-languages
+;;  '((python . t)
+;;    (shell . t)
+;;    (js . t)
+;;    (clojure . t)
+;;    (emacs-lisp . t)
+;;    (ipython . t)
+;;    (jupyter . t)
+;;    ))
+;; (org-babel-jupyter-override-src-block "python")
 
+;; (require 'pubmed)
+;; (require 'pubmed-advanced-search)
+;; (use-package shr-tag-pre-highlight
+;;   :ensure t
+;;   :after shr
+;;   :config
+;;   (add-to-list 'shr-external-rendering-functions
+;;                '(pre . shr-tag-pre-highlight))
+;;   (when (version< emacs-version "26")
+;;     (with-eval-after-load 'eww
+;;       (advice-add 'eww-display-html :around
+;;                   'eww-display-html--override-shr-external-rendering-functions))))
 
+;; (use-package shr-tag-pre-highlight
+;;   :ensure t
+;;   :after shr
+;;   :config
+;;   (add-to-list 'shr-external-rendering-functions
+;;                '(pre . shr-tag-pre-highlight))
+;;   (when (version< emacs-version "26")
+;;     (with-eval-after-load 'eww
+;;       (advice-add 'eww-display-html :around
+;;                   'eww-display-html--override-shr-external-rendering-functions))))
 (defun ety-open (query)
   (progn
     (print (concat "opening ety link: " query))
     (browse-url-chrome (message (concat "https://www.etymonline.com/search?q=" query)))
     ))
+(use-package org)
 (org-link-set-parameters "etl"
                          :follow #'ety-open
                          :face #'org-warning
@@ -33,31 +76,17 @@
 (org-add-link-type "chromium" :follow (lambda (path) (browse-url-chromium (concat "http:" path))))
 (org-add-link-type "chromiums" :follow (lambda (path) (browse-url-chromium (concat "https:" path))))
 (org-add-link-type "ety" :follow (lambda (query) (browse-url-chrome (message (concat "https://www.etymonline.com/search?q=" query)))))
+
 (org-add-link-type "ety" (lambda (query) (progn (message (concat "Fetching etymology for query: " query)) (browse-url-chrome (concat "https://www.etymonline.com/search?q=" query)))))
+(org-add-link-type "prod" (lambda (query) (progn (message (concat "Making product link... : " query)) (browse-url-chrome (concat "https://sbermarket.ru/metro/search?keywords=" (replace-in-string " " "+" query))))))
 
 (custom-set-variables
  '(tramp-default-method "ssh"))
 ;; abbrev dirs: https://www.gnu.org/software/emacs/manual/html_node/tramp/Frequently-Asked-Questions.html 
 
 (setq-default abbrev-mode t)
-;; (define-abbrev global-abbrev-table "dtF" "~/wrk/dotfiles")
-;; (define-abbrhv global-abbrev-table "dta\\" "~/wrk/")
-;; (define-abbrev global-abbrev-table "dL" "~/Downloads/")
-;; (define-abbrev global-abbrev-table "dtP" "~/Desktop/")
-;; (define-abbrev global-abbrev-table "r" "~/lib/rc/")
-;; (define-abbrev global-abbrev-table "r" "~/lib/rc/")
-;; (define-abbrev global-abbrev-table "L" "~/Library/")
-;; (define-abbrev global-abbrev-table "A" "/Applications/")
-;; (define-abbrev global-abbrev-table "S" "/System/")
-;; (define-abbrev global-abbrev-table "V" "/Volumes/")
-;; (define-abbrev global-abbrev-table "U" "/Users/")
-;; (define-abbrev global-abbrev-table "/")
-;; (define-abbrev global-abbrev-table "lb" "~/Library/")
-(define-abbrev global-abbrev-table "srvh" "/ssh:srv:/home/domain/rustam/")
-(define-abbrev global-abbrev-table "srvu" "/ssh:srv:/home/domain/data/rustam/")
-(define-abbrev global-abbrev-table "srvd" "/ssh:srv:/home/domain/data/rustam/dgfl/")
-(define-abbrev global-abbrev-table "srve" "/ssh:srv:/home/domain/data/rustam/dgfl/ed/")
-(define-abbrev global-abbrev-table "srvm" "/ssh:srv:/home/domain/data/rustam/dgfl/md")
+;; (define-abbrev global-abbrev-table "rx" "/ssh:srv:/home/domain/data/rustam/dgfl/md")
+(define-abbrev my-tramp-abbrev-table "rxa" "\\(.*?\\")
 
 ;; define-abbrev-table
 (add-hook
@@ -76,24 +105,13 @@
   (expand-abbrev))
 
 
-(use-package shr-tag-pre-highlight
-  :ensure t
-  :after shr
-  :config
-  (add-to-list 'shr-external-rendering-functions
-               '(pre . shr-tag-pre-highlight))
-  (when (version< emacs-version "26")
-    (with-eval-after-load 'eww
-      (advice-add 'eww-display-html :around
-                  'eww-display-html--override-shr-external-rendering-functions))))
+
 
    ;; Eclim ...
    ;; (add-hook 'java-mode-hook (lambda () (interactive) (progn (message "consider activating :(global-eclim-mode)")(eclim-mode))))
 (custom-set-variables
  '(eclim-eclipse-dirs '("/Users/rst/eclipse/java-2020-03/Eclipse.app/Contents/Eclipse"))
  '(eclim-executable "/Users/rst/.p2/pool/plugins/org.eclim_2.8.0/bin/eclim"))
-(require 'pubmed)
-(require 'pubmed-advanced-search)
 (let ((bookmarkplus-dir "~/.emacs.d/custom/bookmark-plus/")
       (emacswiki-base "https://www.emacswiki.org/emacs/download/")
       (bookmark-files '("bookmark+.el" "bookmark+-mac.el" "bookmark+-bmu.el" "bookmark+-key.el" "bookmark+-lit.el" "bookmark+-1.el")))
@@ -157,16 +175,7 @@
 ;; (evil-define-key 'normal vterm-mode-map (kbd "i")        #'evil-insert-resume)
 ;; (evil-define-key 'normal vterm-mode-map (kbd "o")        #'evil-insert-resume)
 ;; (evil-define-key 'normal vterm-mode-map (kbd "<return>") #'evil-insert-resume))
-(use-package shr-tag-pre-highlight
-  :ensure t
-  :after shr
-  :config
-  (add-to-list 'shr-external-rendering-functions
-                '(pre . shr-tag-pre-highlight))
-  (when (version< emacs-version "26")
-    (with-eval-after-load 'eww
-      (advice-add 'eww-display-html :around
-                  'eww-display-html--override-shr-external-rendering-functions))))
+
 ;; Tramp is slow, so:
 (setq projectile-mode-line "Projectile")
 ;; (setq tramp-verbose 6)
@@ -176,3 +185,126 @@
 (add-to-list 'org-emphasis-alist
              '("*" (:foreground "orange")
                ))
+(setq vterm-toggle-fullscreen-p nil)
+(add-to-list 'display-buffer-alist
+             '((lambda(bufname _) (with-current-buffer bufname (equal major-mode 'vterm-mode)))
+               (display-buffer-reuse-window display-buffer-at-bottom)
+               ;;(display-buffer-reuse-window display-buffer-in-direction)
+               ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+               ;;(direction . bottom)
+               ;;(dedicated . t) ;dedicated is supported in emacs27
+               (reusable-frames . visible)
+               (window-height . 0.3)))
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+         "* TODO %?\n  %i\n  %a")
+        ("j" "Journal" entry (file+datetree "~/org/journal.org")
+         "* %?\nEntered on %U\n  %i\n  %a")))
+;; https://stackoverflow.com/questions/5034839/emacs-pop-up-bottom-window-for-temporary-buffers
+(push '("\*anything*" :regexp t :height 20) popwin:special-display-config)
+
+(add-to-list 'auto-mode-alist '("\\.fnl\\'" . clojure-mode))
+
+(add-to-list 'load-path "/Users/rst/.emacs.d/site-lisp/org-ref/")
+(add-to-list 'load-path "/Users/rst/.emacs.d/site-lisp/misc/")
+(add-to-list 'load-path "/Users/rst/.emacs.d/site-lisp/iproject/")
+(require 'iproject)
+
+(setq symbol-to-kar-py-symbol '(
+("!" . ":!S1")
+("@" . ":!S2")
+("#" . ":!S3")
+("$" . ":!S4")
+("%" . ":!S5")
+("^" . ":!S6")
+("&" . ":!S7")
+("*" . ":!S8")
+("(" . ":!S9")
+(")" . ":!S0")
+("_" . ":!Shyphen")
+("+" . ":!Sequal_sign")
+("Q" . ":!Sq")
+("W" . ":!Sw")
+("E" . ":!Se")
+("R" . ":!Sr")
+("T" . ":!St")
+("Y" . ":!Sy")
+("U" . ":!Su")
+("I" . ":!Si")
+("O" . ":!So")
+("P" . ":!Sp")
+("{" . ":!Sopen_bracket")
+("}" . ":!Sclose_bracket")
+("|" . ":!Sbackslash")
+("A" . ":!Sa")
+("S" . ":!Ss")
+("D" . ":!Sd")
+("F" . ":!Sf")
+("G" . ":!Sg")
+("H" . ":!Sh")
+("J" . ":!Sj")
+("K" . ":!Sk")
+("L" . ":!Sl")
+(":" . ":!Ssemicolon")
+("\"" . ":!Squote")
+("Z" . ":!Sz")
+("X" . ":!Sx")
+("C" . ":!Sc")
+("V" . ":!Sv")
+("B" . ":!Sb")
+("N" . ":!Sn")
+("M" . ":!Sm")
+("<" . ":!Scomma")
+(">" . ":!Speriod")
+("?" . ":!Sslash")
+("1" . ":1")
+("2" . ":2")
+("3" . ":3")
+("4" . ":4")
+("5" . ":5")
+("6" . ":6")
+("7" . ":7")
+("8" . ":8")
+("9" . ":9")
+("0" . ":0")
+("-" . ":hyphen")
+("=" . ":equal_sign")
+("q" . ":q")
+("w" . ":w")
+("e" . ":e")
+("r" . ":r")
+("t" . ":t")
+("y" . ":y")
+("u" . ":u")
+("i" . ":i")
+("o" . ":o")
+("p" . ":p")
+("[" . ":open_bracket")
+("]" . ":close_bracket")
+("\\" . ":backslash")
+("a" . ":a")
+("s" . ":s")
+("d" . ":d")
+("f" . ":f")
+("g" . ":g")
+("h" . ":h")
+("j" . ":j")
+("k" . ":k")
+("l" . ":l")
+(";" . ":semicolon")
+("\'" . ":quote")
+("z" . ":z")
+("x" . ":x")
+("c" . ":c")
+("v" . ":v")
+("b" . ":b")
+("n" . ":n")
+("m" . ":m")
+("," . ":comma")
+("." . ":period")
+("/" . ":slash")
+(" " . ":spacebar")
+                                ))
+(require 'org-ref)
+(require 'org-tempo)
+(page-break-lines-mode)
